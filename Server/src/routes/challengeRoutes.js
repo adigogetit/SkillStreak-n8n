@@ -1,0 +1,13 @@
+const router = require('express').Router()
+const rateLimit = require('express-rate-limit')
+const controller = require('../controllers/challengeController')
+const { requireAuth, requireCsrf } = require('../middleware/auth')
+const asyncHandler = require('../middleware/asyncHandler')
+const generationLimit = rateLimit({ windowMs: 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false, message: { message: 'You have reached the challenge generation limit. Please wait a minute and try again.' } })
+router.use(requireAuth)
+router.get('/today', asyncHandler(controller.today))
+router.get('/history', asyncHandler(controller.history))
+router.post('/generate', requireCsrf, generationLimit, asyncHandler(controller.createNow))
+router.patch('/:id/status', requireCsrf, asyncHandler(controller.updateStatus))
+router.patch('/:id/feedback', requireCsrf, asyncHandler(controller.feedback))
+module.exports = router

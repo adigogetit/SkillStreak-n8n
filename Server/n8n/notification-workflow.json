@@ -1,0 +1,12 @@
+{
+  "name": "SkillStreak - Task notifications only",
+  "nodes": [
+    { "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 10 }] } }, "id": "schedule", "name": "Every 10 minutes", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [280, 300] },
+    { "parameters": { "url": "={{$env.SKILLSTREAK_API_URL + '/api/automation/notifications/due'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "X-Automation-Key", "value": "={{$env.N8N_AUTOMATION_API_KEY}}" }] } }, "id": "due", "name": "Get unsent notifications", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [510, 300] },
+    { "parameters": { "fieldToSplitOut": "notifications" }, "id": "split", "name": "One notification", "type": "n8n-nodes-base.splitOut", "typeVersion": 1, "position": [740, 300] },
+    { "parameters": {}, "id": "delivery", "name": "Email notification (configure)", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [970, 300], "notes": "Configure email delivery only. Telegram delivery is disabled. No Gemini node belongs in this workflow." },
+    { "parameters": { "url": "={{$env.SKILLSTREAK_API_URL + '/api/automation/deliveries'}}", "method": "POST", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "X-Automation-Key", "value": "={{$env.N8N_AUTOMATION_API_KEY}}" }] }, "sendBody": true, "contentType": "json" }, "id": "record", "name": "Record delivery", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1200, 300] }
+  ],
+  "connections": { "Every 10 minutes": { "main": [[{ "node": "Get unsent notifications", "type": "main", "index": 0 }]] }, "Get unsent notifications": { "main": [[{ "node": "One notification", "type": "main", "index": 0 }]] }, "One notification": { "main": [[{ "node": "Email notification (configure)", "type": "main", "index": 0 }]] }, "Email notification (configure)": { "main": [[{ "node": "Record delivery", "type": "main", "index": 0 }]] } },
+  "active": false
+}

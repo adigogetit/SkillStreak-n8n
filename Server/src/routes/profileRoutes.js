@@ -1,0 +1,11 @@
+const router = require('express').Router()
+const multer = require('multer')
+const controller = require('../controllers/profileController')
+const { requireAuth, requireCsrf } = require('../middleware/auth')
+const asyncHandler = require('../middleware/asyncHandler')
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 }, fileFilter: (req, file, cb) => cb(null, file.mimetype === 'application/pdf') })
+router.use(requireAuth)
+router.get('/', controller.getProfile)
+router.put('/', requireCsrf, asyncHandler(controller.updateProfile))
+router.post('/upload', requireCsrf, upload.single('profilePdf'), asyncHandler(controller.upload))
+module.exports = router

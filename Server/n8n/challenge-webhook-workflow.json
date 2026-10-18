@@ -1,0 +1,46 @@
+{
+  "name": "SkillStreak - Create Now challenge notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "skillstreak-challenge",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "skillstreak-challenge-webhook",
+      "name": "SkillStreak Challenge Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 300],
+      "webhookId": "skillstreak-challenge"
+    },
+    {
+      "parameters": {
+        "fromEmail": "SkillStreak <YOUR_VERIFIED_SENDER_EMAIL>",
+        "toEmail": "={{ (() => { const incoming = $('SkillStreak Challenge Webhook').item.json; const challenge = incoming.body || incoming; return challenge.email || '' })() }}",
+        "subject": "={{ (() => { const incoming = $('SkillStreak Challenge Webhook').item.json; const challenge = incoming.body || incoming; return 'Your SkillStreak challenge: ' + (challenge.title || 'New challenge') + (challenge.topic ? ' — ' + challenge.topic : '') })() }}",
+        "emailFormat": "text",
+        "text": "={{ (() => { const incoming = $('SkillStreak Challenge Webhook').item.json; const challenge = incoming.body || incoming; const list = (values) => Array.isArray(values) ? values.map((value, index) => (index + 1) + '. ' + value).join('\\n') : ''; return ['🔥 Your SkillStreak challenge is ready!', '', 'Challenge: ' + (challenge.title || 'Not provided'), 'Topic: ' + (challenge.topic || 'Not provided'), 'Difficulty: ' + (challenge.difficulty || 'Not provided'), challenge.estimatedMinutes ? 'Estimated time: ' + challenge.estimatedMinutes + ' minutes' : '', '', 'Your question / task:', challenge.description || 'Question details were not provided.', challenge.instructions && challenge.instructions.length ? '' : '', challenge.instructions && challenge.instructions.length ? 'Instructions:' : '', list(challenge.instructions), challenge.examples && challenge.examples.length ? '' : '', challenge.examples && challenge.examples.length ? 'Example:' : '', list(challenge.examples), challenge.successCriteria && challenge.successCriteria.length ? '' : '', challenge.successCriteria && challenge.successCriteria.length ? 'Done when:' : '', list(challenge.successCriteria), '', 'Open SkillStreak and complete your challenge. Keep your streak alive! 🚀'].filter((line) => line !== '').join('\\n') })() }}"
+      },
+      "id": "send-email",
+      "name": "Send an Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [780, 200]
+    }
+  ],
+  "connections": {
+    "SkillStreak Challenge Webhook": {
+      "main": [
+        [
+          { "node": "Send an Email", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
